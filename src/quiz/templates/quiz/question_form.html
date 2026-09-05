@@ -1,0 +1,99 @@
+{% extends "quiz/base.html" %}
+
+{% block title %}Nueva pregunta · {{ exam.title }} · QuizLab{% endblock %}
+
+{% block content %}
+<nav class="mb-6 text-sm text-slate-500">
+    <a href="{% url 'quiz:exam_list' %}" class="hover:text-violet-700 transition-colors">Exámenes</a>
+    <span class="mx-2 text-slate-300">/</span>
+    <a href="{% url 'quiz:exam_detail' exam.pk %}" class="hover:text-violet-700 transition-colors">{{ exam.title }}</a>
+    <span class="mx-2 text-slate-300">/</span>
+    <span class="font-medium text-slate-700">Nueva pregunta</span>
+</nav>
+
+<div class="mx-auto max-w-3xl rounded-2xl bg-white p-6 sm:p-8 shadow-sm ring-1 ring-slate-200">
+    <h1 class="text-2xl font-bold text-slate-900">Nueva pregunta</h1>
+    <p class="mt-1 text-sm text-slate-500">Selecciona una única opción correcta (obligatorio).</p>
+
+    <form method="post" novalidate class="mt-8 space-y-8">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="errorlist nonfield rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="space-y-4">
+            <div>
+                <label for="{{ form.exam.id_for_label }}" class="mb-1 block text-sm font-semibold text-slate-700">Examen</label>
+                {{ form.exam }}
+                {% if form.exam.errors %}<div class="errorlist">{{ form.exam.errors }}</div>{% endif %}
+            </div>
+            <div>
+                <label for="{{ form.text.id_for_label }}" class="mb-1 block text-sm font-semibold text-slate-700">Enunciado</label>
+                {{ form.text }}
+                {% if form.text.errors %}<div class="errorlist">{{ form.text.errors }}</div>{% endif %}
+            </div>
+            <div>
+                <label for="{{ form.puntaje.id_for_label }}" class="mb-1 block text-sm font-semibold text-slate-700">Puntaje</label>
+                {{ form.puntaje }}
+                {% if form.puntaje.errors %}<div class="errorlist">{{ form.puntaje.errors }}</div>{% endif %}
+            </div>
+        </div>
+
+        <fieldset>
+            <legend class="mb-3 block text-sm font-semibold text-slate-700">Opciones de respuesta</legend>
+
+            {% if choice_formset.non_form_errors %}
+            <div class="errorlist nonfield mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {{ choice_formset.non_form_errors }}
+            </div>
+            {% endif %}
+
+            {{ choice_formset.management_form }}
+
+            <div class="space-y-4">
+                {% for choice_form in choice_formset %}
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    {% for hidden in choice_form.hidden_fields %}{{ hidden }}{% endfor %}
+                    <div class="grid gap-4 sm:grid-cols-[1fr_auto]">
+                        <div>
+                            <label for="{{ choice_form.text.id_for_label }}" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Opción {{ forloop.counter }}
+                            </label>
+                            {{ choice_form.text }}
+                            {% if choice_form.text.errors %}<div class="errorlist">{{ choice_form.text.errors }}</div>{% endif %}
+                        </div>
+                        <div class="flex items-end gap-2">
+                            <label for="{{ choice_form.is_correct.id_for_label }}" class="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-600 hover:border-emerald-300">
+                                {{ choice_form.is_correct }}
+                                Correcta
+                            </label>
+                            {% if choice_form.DELETE %}
+                            <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 hover:border-red-300">
+                                {{ choice_form.DELETE }}
+                                Eliminar
+                            </label>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if choice_form.is_correct.errors %}<div class="errorlist">{{ choice_form.is_correct.errors }}</div>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </fieldset>
+
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <a href="{% url 'quiz:exam_detail' exam.pk %}"
+               class="inline-flex justify-center rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+                Cancelar
+            </a>
+            <button type="submit"
+                    class="inline-flex justify-center rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg hover:from-violet-700 hover:to-indigo-700 transition-all">
+                Guardar pregunta
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
